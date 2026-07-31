@@ -26,3 +26,49 @@ module.exports.register = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+
+module.exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        const user = await userModel
+            .findOne({ email })
+            .select('+password')
+        if (!user) {
+            return res.status(400).json({ message: "user NOT found" })
+        }
+
+        const isMatch = bcrypt.compare(password, user.password)
+
+        if (!isMatch) {
+            return res.status(400).json({ messaage: "Invalid credentials" })
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
+        res.cookie("token", token)
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+}
+
+module.exports.logOut = async (req, res) => {
+    try {
+        const token = res.cookies.token;
+        await blackListTokenModel.create({ token })
+        res.clesrCookie('token');
+        res.send('token');
+        res.send({ message: "user logout successfully" })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+
+module.exports.profile = async (req, res) => {
+    try {
+        res.send(req.user)
+    } catch (error) {
+        res.status(500).json({ message: error.messaage })
+    }
+}
