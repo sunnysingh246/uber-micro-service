@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken')
-const userModel = require('../models/user.model.js')
+const captainModel = require('../models/captain.model.js')
 const blackListTokenModel = require('../models/blackListToken.model.js')
 
-module.exports.userAuth = async (req, res) => {
+module.exports.captainAuth = async (req, res) => {
 
     try {
         const token = res.cookies.token || res.headers.authorization.split('')[1]
@@ -24,7 +24,7 @@ module.exports.userAuth = async (req, res) => {
             return res.status(401).json({ message: "Unauthorized" })
         }
 
-        req.user = user
+        req.captain = captain
         next()
     } catch (error) {
         res.status(500).json({ message: "Unauthorized" })
