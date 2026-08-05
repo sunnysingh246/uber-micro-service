@@ -2,6 +2,8 @@ const userModel = require('../models/user.model.js')
 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { subscribe } = require('../routes/user.routes.js')
+const { subscribeToQueue } = require('../../ride/services/rabbit.js')
 
 
 module.exports.register = async (req, res) => {
@@ -29,7 +31,7 @@ module.exports.register = async (req, res) => {
             user: newuser,
             password: hash
         });
- 
+
 
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -54,9 +56,9 @@ module.exports.login = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
-        delete user._doc.password   
+        delete user._doc.password
         res.cookie("token", token)
-        res.send({token,user})
+        res.send({ token, user })
 
     } catch (error) {
         return res.status(500).json({ message: error.message })
@@ -82,4 +84,18 @@ module.exports.profile = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.messaage })
     }
+}
+
+module.exports.acceptedRide = async (req, res) => {
+
+    //long polling wait for ride accepted 
+    rideEventEmitter.once('ride-accept', (data) => {
+        res.send(data)
+    })
+
+    //setTimeOut for long polling eg:30seconds
+    subscribeToQueue("accepted-ride", async (message) => {
+        const data = JSON.parse(message)
+        rideEventEmitter.emit('ride-accepted', data)
+    })
 }

@@ -6,7 +6,7 @@ const connect = require('./db/db');
 connect();
 const cookieParser = require('cookie-parser');
 const rideRoutes = require('./routes/ride.routes');
-const rabbitMq = require('./service/rabbit')
+const rabbitMq = require('./services/rabbit.js')
 
 rabbitMq.connect();
 

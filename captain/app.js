@@ -1,13 +1,20 @@
+const dotenv = require('dotenv')
+dotenv.config()
 const express = require('express')
-const expressProxy = require('express-http-proxy')
-
 const app = express()
+const connect = require('./db/db.js')
+connect()
 
-app.use('/user', expressProxy('http://localhost:3001'))
-app.use('/captain', expressProxy('http://localhost:3002'))
+const captainRoutes = require('../captain/routes/captain.routes.js')
+const expressProxy = require('express-http-proxy')
+const cookiePharser = require('cookie-parser')
 
-app.listen(3000, () => {
-    console.log('Gateway server listening on port 3000')
-})
+const rabbitMq = require('./service/rabbit.js')
+rabbitMq.connect()
 
-module.exports=app ;
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(cookiePharser())
+
+module.exports = app;

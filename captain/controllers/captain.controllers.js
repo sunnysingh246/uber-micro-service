@@ -1,4 +1,5 @@
 const captainModel = require('../models/captain.model.js')
+const { subscribeToQueue } = require('../service/rabbit.js')
 
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -94,3 +95,24 @@ module.exports.toggleAvailability = async (req, res) => {
         res.status(500).json({ message: error.messaage })
     }
 }
+module.exports.waitForNewRide = async (req, res) => {
+    // Set timeout for long polling (e.g., 30 seconds)
+    req.setTimeout(30000, () => {
+        res.status(204).end(); // No Content
+    });
+
+    // Add the response object to the pendingRequests array
+    pendingRequests.push(res);
+};
+
+subscribeToQueue("new-ride", (data) => {
+    const rideData = JSON.parse(data);
+
+    // Send the new ride data to all pending requests
+    pendingRequests.forEach(res => {
+        res.json(rideData);
+    });
+
+    // Clear the pending requests
+    pendingRequests.length = 0;
+});

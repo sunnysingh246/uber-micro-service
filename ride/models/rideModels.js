@@ -19,8 +19,8 @@ const rideSchema = new mongoose.Schema(
 
         destination: {
             type: String,
-            emum: ['requested', 'accepted', 'started', 'completed'],
-            default: requested
+            emum: ['REQUESTED', 'ACCEPTED', 'STARTED', 'COMPLETED'],
+            default: 'REQUESTED'
         },
 
 

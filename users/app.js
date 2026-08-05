@@ -9,6 +9,9 @@ const connect = require('./db/db.js')
 connect()
 
 
+const rabbitMq = require('./services/rabbit.js')
+rabbitMq.connect()
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookiePaser())
